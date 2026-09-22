@@ -5,6 +5,7 @@ import { PillLink } from "@/components/PillButton";
 import { BookCover, Sticker } from "@/components/BookCover";
 import { getUserId } from "@/lib/session";
 import { Cloud } from "@/components/Cloud";
+import { Landscape } from "@/components/Landscape";
 
 export default async function Landing() {
   const signedIn = Boolean(await getUserId());
@@ -20,7 +21,7 @@ export default async function Landing() {
       <SpreadPreview />
       <GrowthPreview />
       <SkyCta cta={cta} />
-      <Footer />
+      <Footer signedIn={signedIn} />
     </main>
   );
 }
@@ -417,10 +418,10 @@ function GrowthPreview() {
 
 function SkyCta({ cta }: { cta: Cta }) {
   return (
-    <section className="sky relative overflow-hidden px-6 pb-40 pt-28 text-center text-white md:pb-52 md:pt-36">
+    <section className="sky relative z-10 overflow-x-clip px-6 pb-40 pt-28 text-center text-white md:pb-48 md:pt-36">
       <Cloud className="left-[-14%] top-[46%] w-[38%]" />
       <Cloud variant={1} className="right-[-16%] top-[46%] w-[40%]" />
-      <Cloud className="left-[24%] top-[72%] w-[54%]" />
+      <Cloud className="left-[30%] top-[64%] w-[40%]" />
       <Cloud variant={2} className="left-[6%] top-[6%] w-[16%] opacity-80" />
       <Cloud variant={2} className="right-[8%] top-[4%] w-[14%] opacity-70" />
       <div className="relative">
@@ -440,13 +441,66 @@ function SkyCta({ cta }: { cta: Cta }) {
   );
 }
 
-function Footer() {
+function Footer({ signedIn }: { signedIn: boolean }) {
+  const columns = [
+    {
+      title: "The book",
+      links: [
+        { label: "Why it exists", href: "#why" },
+        { label: "How it works", href: "#how" },
+        { label: "A day\u2019s page", href: "#page" },
+        { label: "Growth", href: "#growth" },
+      ],
+    },
+    {
+      title: "Your book",
+      links: signedIn
+        ? [
+            { label: "Open my book", href: "/book" },
+            { label: "Growth", href: "/growth" },
+            { label: "Profile", href: "/profile" },
+          ]
+        : [
+            { label: "Start your book", href: "/signup" },
+            { label: "Log in", href: "/login" },
+          ],
+    },
+  ];
+
   return (
-    <footer className="relative -mt-16 px-6 pb-10">
-      <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 rounded-2xl bg-page/90 px-6 py-5 text-sm text-ink-soft ring-1 ring-line backdrop-blur md:flex-row">
-        <Logo className="h-4 text-ink" />
-        <p className="font-hand text-lg">handwritten for people who want to make their year count.</p>
-        <p>© {new Date().getFullYear()} LockedIn</p>
+    <footer
+      className="relative isolate overflow-hidden"
+      style={{ background: "linear-gradient(180deg, #f4f8fc 0%, #f8efe2 30%, #fbd9b0 62%, #f6c28c 100%)" }}
+    >
+      <Landscape className="absolute bottom-0 -left-[180px] -z-10 w-[max(100%,900px)] sm:left-1/2 sm:-translate-x-1/2" />
+      <div className="mx-auto max-w-6xl px-6 pb-[max(300px,31vw)] pt-16 md:pt-20">
+        <div className="grid gap-10 sm:grid-cols-[1.4fr_1fr_1fr]">
+          <div>
+            <Logo className="h-5 text-ink" />
+            <p className="mt-4 max-w-xs font-serif text-lg leading-snug text-ink-soft">
+              A diary for the year between this birthday and the next.
+            </p>
+          </div>
+          {columns.map((c) => (
+            <nav key={c.title} aria-label={c.title}>
+              <h3 className="font-display text-lg font-semibold">{c.title}</h3>
+              <ul className="mt-3 space-y-2 text-[15px] text-ink-soft">
+                {c.links.map((l) => (
+                  <li key={l.label}>
+                    <Link href={l.href} className="transition-colors hover:text-ink">
+                      {l.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          ))}
+        </div>
+
+        <div className="absolute inset-x-0 bottom-0 mx-auto flex max-w-6xl flex-col gap-1 px-6 pb-7 text-sm text-white/90 [text-shadow:0_1px_8px_rgba(40,60,20,0.5)] sm:flex-row sm:items-end sm:justify-between">
+          <p className="font-hand text-2xl text-white">handwritten for people who want to make their year count.</p>
+          <p>© {new Date().getFullYear()} LockedIn</p>
+        </div>
       </div>
     </footer>
   );
