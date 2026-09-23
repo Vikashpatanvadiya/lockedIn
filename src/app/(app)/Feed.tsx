@@ -1,15 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import clsx from "clsx";
-import { AlertCircle, Check, Loader2, Plus, X } from "lucide-react";
+import { AlertCircle, ArrowLeft, Check, Loader2, Plus, X } from "lucide-react";
 import { Calendar } from "@/components/Calendar";
 import { addDays, ageOn, diffDays, formatFeed, lastBirthday, localToday, nextBirthday } from "@/lib/dates";
 import type { Goal, Review, Task, User } from "@/lib/types";
 import { useTasks } from "./useTasks";
 import { YearReview, type FinishedChapter } from "./YearReview";
-
-const CHUNK = 21;
 
 export function Feed({
   user,
@@ -29,8 +27,8 @@ export function Feed({
     setToday(localToday());
   }, []);
 
-  // The current chapter only: it starts on your last birthday (or the day you
-  // joined, whichever is later) and ends the day before your next birthday.
+  // The current chapter: it starts on your last birthday (or the day you joined,
+  // whichever is later) and ends the day before your next birthday.
   const chapter = useMemo(() => {
     if (!today) return null;
     const joined = user.created_at.slice(0, 10);
@@ -53,62 +51,18 @@ export function Feed({
     return { start: start > joined ? start : joined, end, year: ageOn(user.birthday, end) };
   }, [chapter, user.birthday, user.created_at]);
 
-  const [to, setTo] = useState("");
-  const [selected, setSelected] = useState("");
+  // Only one day is on screen: today, unless you look back with the calendar.
+  const [viewing, setViewing] = useState("");
   useEffect(() => {
-    if (!chapter || to) return;
-    const end = addDays(today, CHUNK);
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- seed the window once today is known
-    setTo(end < chapter.end ? end : chapter.end);
-    setSelected(today);
-  }, [chapter, to, today]);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- start on today once it is known
+    if (today && !viewing) setViewing(today);
+  }, [today, viewing]);
 
-  const days = useMemo(() => {
-    if (!chapter || !to) return [];
-    const list: string[] = [];
-    for (let d = chapter.start; d <= to; d = addDays(d, 1)) list.push(d);
-    return list;
-  }, [chapter, to]);
+  if (!chapter || !today || !viewing) return <div className="h-dvh" />;
 
-  const atEnd = Boolean(chapter && to >= chapter.end);
-  const later = useCallback(() => {
-    if (!chapter) return;
-    setTo((prev) => {
-      const next = addDays(prev, CHUNK);
-      return next < chapter.end ? next : chapter.end;
-    });
-  }, [chapter]);
-
-  const bottom = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!bottom.current || atEnd) return;
-    const observer = new IntersectionObserver((entries) => entries.some((e) => e.isIntersecting) && later(), { rootMargin: "400px" });
-    observer.observe(bottom.current);
-    return () => observer.disconnect();
-  }, [later, atEnd]);
-
-  const jumpTo = useCallback(
-    (date: string) => {
-      setSelected(date);
-      setTo((prev) => (date > prev ? date : prev));
-      requestAnimationFrame(() =>
-        requestAnimationFrame(() => document.getElementById(`day-${date}`)?.scrollIntoView({ block: "start", behavior: "smooth" })),
-      );
-    },
-    [],
-  );
-
-  // Land on today the first time the feed renders — unless the chapter has only
-  // just begun, in which case the top of the list already shows today.
-  const landed = useRef(false);
-  useEffect(() => {
-    if (landed.current || !today || !days.length || !chapter) return;
-    landed.current = true;
-    if (diffDays(chapter.start, today) <= 3) return;
-    document.getElementById(`day-${today}`)?.scrollIntoView({ block: "start" });
-  }, [today, days, chapter]);
-
-  if (!chapter || !today || !to) return <div className="h-dvh" />;
+  const next = user.birthday ? nextBirthday(user.birthday, today) : null;
+  const daysLeft = next ? diffDays(today, next) : null;
+  const turning = user.birthday && next ? ageOn(user.birthday, next) : null;
 
   const goals = t.goals.filter((g) => g.chapter_start === chapter.start);
   const countFor = (goalId: string) => {
@@ -116,13 +70,11 @@ export function Feed({
     return { done: linked.filter((task) => task.done).length, total: linked.length };
   };
 
-  const next = user.birthday ? nextBirthday(user.birthday, today) : null;
-  const daysLeft = next ? diffDays(today, next) : null;
-  const turning = user.birthday && next ? ageOn(user.birthday, next) : null;
+  const isToday = viewing === today;
 
   return (
-    <div className="mx-auto max-w-xl px-5 pb-32">
-      <header className="sticky top-0 z-30 -mx-5 border-b border-line bg-bg/90 px-5 pb-4 pt-4 backdrop-blur">
+    <div className="mx-auto max-w-xl px-5 pb-24">
+      <header className="border-b border-line pb-4">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             {daysLeft != null && turning != null ? (
@@ -142,26 +94,18 @@ export function Feed({
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <SaveDot status={t.status} />
+            {/* Look back at an earlier day. Days ahead stay out of reach. */}
             <Calendar
               today={today}
-              selected={selected}
+              selected={viewing}
               min={chapter.start}
-              max={chapter.end}
+              max={today}
               hasTasks={(d) => Boolean(t.byDate[d]?.length)}
-              onPick={jumpTo}
+              onPick={setViewing}
             />
           </div>
         </div>
       </header>
-
-      {chapter.year != null && (
-        <h2 className="pb-1 pt-8 text-[clamp(26px,5.6vw,34px)] font-medium leading-none">
-          {chapter.year} Year <span className="text-ink-faint">:</span>
-        </h2>
-      )}
-      <p className="pb-2 text-xs text-ink-faint">
-        {formatFeed(chapter.start)} → {formatFeed(chapter.end)}
-      </p>
 
       {finished && (
         <YearReview
@@ -171,6 +115,15 @@ export function Feed({
           letter={reviews.find((r) => r.chapter_start === finished.start)?.letter ?? ""}
         />
       )}
+
+      {chapter.year != null && (
+        <h2 className="pb-1 pt-8 text-[clamp(26px,5.6vw,34px)] font-medium leading-none">
+          {chapter.year} Year <span className="text-ink-faint">:</span>
+        </h2>
+      )}
+      <p className="pb-2 text-xs text-ink-faint">
+        {formatFeed(chapter.start)} → {formatFeed(chapter.end)}
+      </p>
 
       <section className="mb-6 mt-4 rounded-2xl border border-line bg-surface p-4">
         <div className="flex items-baseline justify-between">
@@ -220,35 +173,32 @@ export function Feed({
             );
           })}
         </ul>
-        <AddRow placeholder={goals.length ? "Add another goal" : "What do you want to achieve this year?"} onAdd={(text) => t.addGoal(text, chapter.start)} />
+        <AddRow
+          placeholder={goals.length ? "Add another goal" : "What do you want to achieve this year?"}
+          onAdd={(text) => t.addGoal(text, chapter.start)}
+        />
       </section>
 
-      {days.map((date) => (
-        <Day
-          key={date}
-          date={date}
-          today={today}
-          tasks={t.byDate[date] ?? []}
-          goals={goals}
-          onAdd={(text, goalId) => t.add(date, text, goalId)}
-          onToggle={t.toggle}
-          onEdit={t.edit}
-          onRemove={t.remove}
-          onSetGoal={t.setGoalOf}
-          onFocus={() => setSelected(date)}
-        />
-      ))}
-
-      <div ref={bottom} />
-      {atEnd ? (
-        <p className="py-8 text-center text-sm text-ink-faint">
-          {user.birthday ? `Your ${turning}th birthday closes this chapter.` : "That's the end of the list."}
-        </p>
-      ) : (
-        <button onClick={later} className="mx-auto mt-4 block text-xs font-medium uppercase tracking-widest text-ink-faint transition-colors hover:text-ink">
-          more days
+      {!isToday && (
+        <button
+          onClick={() => setViewing(today)}
+          className="mb-3 inline-flex items-center gap-2 text-sm font-medium text-orange transition-colors hover:text-orange-soft"
+        >
+          <ArrowLeft className="size-4" /> Back to today
         </button>
       )}
+
+      <Day
+        date={viewing}
+        today={today}
+        tasks={t.byDate[viewing] ?? []}
+        goals={goals}
+        onAdd={(text, goalId) => t.add(viewing, text, goalId)}
+        onToggle={t.toggle}
+        onEdit={t.edit}
+        onRemove={t.remove}
+        onSetGoal={t.setGoalOf}
+      />
     </div>
   );
 }
@@ -263,7 +213,6 @@ function Day({
   onEdit,
   onRemove,
   onSetGoal,
-  onFocus,
 }: {
   date: string;
   today: string;
@@ -274,22 +223,14 @@ function Day({
   onEdit: (id: string, text: string) => void;
   onRemove: (id: string) => void;
   onSetGoal: (taskId: string, goalId: string | null) => void;
-  onFocus: () => void;
 }) {
   const isToday = date === today;
   const done = tasks.filter((x) => x.done).length;
 
   return (
-    <section
-      id={`day-${date}`}
-      onFocus={onFocus}
-      className={clsx(
-        "scroll-mt-28 py-4",
-        isToday ? "-mx-3 rounded-2xl border border-orange/40 bg-surface px-3" : "border-b border-line",
-      )}
-    >
+    <section className={clsx("rounded-2xl border p-4", isToday ? "border-orange/40 bg-surface" : "border-line")}>
       <div className="flex items-center justify-between gap-3">
-        <h3 className={clsx("text-[15px] font-medium", date > today ? "text-ink-faint" : "text-ink")}>
+        <h3 className="text-[15px] font-medium">
           {formatFeed(date)} <span className="text-ink-faint">:</span>
         </h3>
         <div className="flex items-center gap-2 text-xs">

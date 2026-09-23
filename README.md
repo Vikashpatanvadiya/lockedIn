@@ -1,23 +1,10 @@
 # LockedIn
 
-A day-by-day challenge journal. You sign up with your birthday, and the app counts down to your next one: *165 days left to become 22 years old*. Below that is one endless list of days — each with its own tasks — split into chapters by your birthdays.
+A day-by-day challenge journal. You sign up with your birthday, and the app counts down to your next one: *165 days left to become 22*. Under that sits this year's goals and **today's task list — only today**.
 
-```
-21 Year :
+Days in the past drop out of view once they're over, and days ahead are never shown, so there is nothing to plan around or scroll through. The calendar can look back at an earlier day in this chapter (with a "Back to today" link), but it cannot reach into the future.
 
-23 Sept 2026 :
-  Superteam member application
-  Gym - legs
---------------------------------
-24 Sept 2026 :
-  ...
-```
-
-When a birthday passes, the next chapter heading appears on its own. Nothing to set up.
-
-Each chapter has its own goals, and a task can point at the goal it works towards. Only the current chapter is shown.
-
-When a birthday closes a chapter, the finished year appears at the top as a summary — tasks added, tasks completed, goals achieved — with a letter to yourself about how the year went. It collapses once written. Days before your last birthday — or before the day you joined — are not listed.
+Each chapter runs birthday to birthday and has its own goals; a task can point at the goal it works towards. When a birthday closes a chapter, the finished year appears at the top as a summary — tasks added, tasks completed, goals achieved — with a letter to yourself about how the year went. It collapses once written.
 
 ## Stack
 
@@ -52,9 +39,7 @@ Dark UI on `#121212` using the MetEngine palette: orange `#FF9125` for accents a
 | `db/schema.sql` | `users`, `goals`, `tasks` (optional `goal_id`) and `year_reviews` |
 | `src/app/(app)/YearReview.tsx` | End-of-year numbers and the letter to yourself |
 | `db/drop-legacy.sql` | Optional: removes the old book/chapter tables. **Deletes their data** |
-| `src/app/(app)/Feed.tsx` | The countdown header, year chapters, and the endless day list |
+| `src/app/(app)/Feed.tsx` | Countdown header, chapter goals, and today's task list |
 | `src/app/(app)/useTasks.ts` | Optimistic task edits with debounced autosave |
 | `src/components/Calendar.tsx` | Month picker that jumps the feed to a day |
 | `src/app/actions/` | Server actions. Every write is scoped to the signed-in user |
-
-The feed loads three weeks either side of today and adds more as you scroll, in both directions.
