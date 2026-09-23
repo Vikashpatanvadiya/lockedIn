@@ -63,9 +63,25 @@ export function nextBirthday(birthday: string, from: string): string {
   return `${year + 1}-${m}-${d}`;
 }
 
+/** Most recent birthday on or before `from` — the day the current year started. */
+export function lastBirthday(birthday: string, from: string): string {
+  const [, m, d] = birthday.split("-");
+  const year = Number(from.slice(0, 4));
+  const candidate = `${year}-${m}-${d}`;
+  return candidate <= from ? candidate : `${year - 1}-${m}-${d}`;
+}
+
 /** Age the person turns on `on` (their birthday that day or the next). */
 export function ageOn(birthday: string, on: string): number {
   const by = Number(birthday.slice(0, 4));
   const oy = Number(on.slice(0, 4));
   return on.slice(5) >= birthday.slice(5) ? oy - by : oy - by - 1;
+}
+
+// "23 Sept 2026" — the feed's own date style.
+const SHORT_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
+
+export function formatFeed(iso: string): string {
+  const [y, m, d] = iso.split("-");
+  return `${Number(d)} ${SHORT_MONTHS[Number(m) - 1]} ${y}`;
 }

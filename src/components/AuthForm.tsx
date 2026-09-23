@@ -6,59 +6,64 @@ import { login, signup, type AuthState } from "@/app/actions/auth";
 import { PillButton } from "./PillButton";
 
 const input =
-  "h-12 w-full rounded-xl border border-line bg-page px-4 text-[15px] outline-none transition focus:border-kraft/60 focus:bg-white focus:ring-4 focus:ring-sun/50";
+  "h-12 w-full rounded-xl border border-line bg-surface px-4 text-[15px] outline-none transition placeholder:text-ink-faint focus:border-orange/60";
+const label = "mb-1.5 block text-xs font-medium text-ink-soft";
 
 export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const [state, action, pending] = useActionState<AuthState, FormData>(mode === "login" ? login : signup, undefined);
   const isSignup = mode === "signup";
+  const today = new Date().toISOString().slice(0, 10);
 
   return (
     <div>
-      <p className="font-hand text-2xl text-orange -rotate-1">{isSignup ? "a fresh first page" : "welcome back"}</p>
-      <h1 className="mt-1 font-display text-4xl font-semibold tracking-[-0.02em]">
-        {isSignup ? "Start your book" : "Open your book"}
-      </h1>
-      <p className="mt-2 text-ink-soft">
-        {isSignup ? "Takes a minute. The letter to yourself comes next." : "Today’s page is waiting for you."}
+      <h1 className="text-3xl font-medium">{isSignup ? "Start your year" : "Log in"}</h1>
+      <p className="mt-2 text-sm text-ink-soft">
+        {isSignup ? "Your birthday sets the challenge: this birthday to the next." : "Today’s list is waiting for you."}
       </p>
 
-      <form action={action} className="mt-8 space-y-3">
+      <form action={action} className="mt-8 space-y-4">
         {isSignup && (
           <label className="block">
-            <span className="sr-only">Your name</span>
-            <input name="name" placeholder="Your name" autoComplete="name" defaultValue={state?.name} className={input} required />
+            <span className={label}>Your name</span>
+            <input name="name" placeholder="Bansi" autoComplete="name" defaultValue={state?.name} className={input} required />
           </label>
         )}
         <label className="block">
-          <span className="sr-only">Email</span>
-          <input name="email" type="email" placeholder="Email" autoComplete="email" defaultValue={state?.email} className={input} required />
+          <span className={label}>Email</span>
+          <input name="email" type="email" placeholder="you@mail.com" autoComplete="email" defaultValue={state?.email} className={input} required />
         </label>
         <label className="block">
-          <span className="sr-only">Password</span>
+          <span className={label}>Password</span>
           <input
             name="password"
             type="password"
-            placeholder={isSignup ? "Password (8+ characters)" : "Password"}
+            placeholder={isSignup ? "At least 8 characters" : "Your password"}
             autoComplete={isSignup ? "new-password" : "current-password"}
             minLength={isSignup ? 8 : undefined}
             className={input}
             required
           />
         </label>
+        {isSignup && (
+          <label className="block">
+            <span className={label}>Your birthday</span>
+            <input name="birthday" type="date" max={today} defaultValue={state?.birthday} className={input} required />
+          </label>
+        )}
         {state?.error && (
-          <p role="alert" className="rounded-lg bg-rose/25 px-3 py-2 text-sm text-[#8a2e22]">
+          <p role="alert" className="rounded-lg border border-red/40 bg-red/10 px-3 py-2 text-sm text-red">
             {state.error}
           </p>
         )}
-        <PillButton type="submit" disabled={pending} className="mt-3 w-full justify-between">
-          {pending ? "One moment…" : isSignup ? "Create my account" : "Log in"}
+        <PillButton type="submit" disabled={pending} className="mt-2 w-full">
+          {pending ? "One moment…" : isSignup ? "Start" : "Log in"}
         </PillButton>
       </form>
 
       <p className="mt-8 text-sm text-ink-soft">
-        {isSignup ? "Already have a book? " : "New here? "}
-        <Link href={isSignup ? "/login" : "/signup"} className="font-medium text-ink underline decoration-orange/60 underline-offset-4">
-          {isSignup ? "Log in" : "Start your book"}
+        {isSignup ? "Already started? " : "New here? "}
+        <Link href={isSignup ? "/login" : "/signup"} className="font-medium text-orange hover:underline">
+          {isSignup ? "Log in" : "Start your year"}
         </Link>
       </p>
     </div>

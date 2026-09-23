@@ -1,139 +1,53 @@
 @import "tailwindcss";
 
 @theme {
-  --font-display: var(--font-fraunces), Georgia, serif;
-  --font-serif: var(--font-newsreader), Georgia, serif;
-  --font-hand: var(--font-caveat), "Comic Sans MS", cursive;
-  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-heading: "Clash Grotesk", var(--font-jakarta), system-ui, sans-serif;
+  --font-sans: var(--font-jakarta), system-ui, sans-serif;
 
-  --color-paper: #fbf8f3;
-  --color-paper-2: #f4eee4;
-  --color-page: #fffdf8;
-  --color-ink: #2a1d12;
-  --color-ink-soft: #6b5a4a;
-  --color-ink-faint: #a8998a;
-  --color-line: #e8dfd1;
-  --color-kraft: #9b7150;
-  --color-kraft-dark: #7a5539;
-  --color-orange: #e8662c;
-  --color-sun: #fce38a;
-  --color-mint: #7ed67a;
-  --color-rose: #f3a6a0;
-  --color-sky: #4da3f4;
-  --color-periwinkle: #afc8f8;
-  --color-forest: #1f4d3a;
-
-  --animate-float: float 6s ease-in-out infinite;
-  --animate-marquee: marquee 40s linear infinite;
+  /* MetEngine palette */
+  --color-bg: #121212;
+  --color-surface: #191919;
+  --color-surface-2: #1f1f1f;
+  --color-line: rgba(239, 239, 239, 0.1);
+  --color-ink: #efefef;
+  --color-ink-soft: #a0a0a0;
+  --color-ink-faint: #6f6f6f;
+  --color-orange: #ff9125;
+  --color-orange-soft: #fda24a;
+  --color-sand: #fbdc7b;
+  --color-sand-soft: #f5e28d;
+  --color-gold: #e4bf2f;
+  --color-red: #f16056;
+  --color-green: #45d09d;
 }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0) rotate(var(--r, 0deg)); }
-  50% { transform: translateY(-10px) rotate(var(--r, 0deg)); }
-}
-@keyframes marquee {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
+html {
+  background: var(--color-bg);
+  color-scheme: dark;
 }
 
-html { background: var(--color-paper); }
 body {
-  background: var(--color-paper);
+  background: var(--color-bg);
   color: var(--color-ink);
   font-family: var(--font-sans);
-}
-::selection { background: var(--color-sun); color: var(--color-ink); }
-
-.font-display { font-variation-settings: "SOFT" 100, "WONK" 0; }
-
-/* ---------- Deta-style annotations ---------- */
-.hl {
-  background: linear-gradient(104deg, transparent 0.4%, var(--color-sun) 1.2%, var(--color-sun) 97%, transparent 99%);
-  padding: 0 0.2em;
-  border-radius: 0.2em;
-  box-decoration-break: clone;
-  -webkit-box-decoration-break: clone;
-}
-.ul-rose {
-  text-decoration: underline;
-  text-decoration-color: var(--color-rose);
-  text-decoration-thickness: 3px;
-  text-underline-offset: 4px;
-}
-.ring-hand {
-  position: relative;
-  white-space: nowrap;
-}
-.ring-hand::after {
-  content: "";
-  position: absolute;
-  inset: -0.25em -0.45em;
-  border: 2px solid var(--color-mint);
-  border-radius: 50%;
-  transform: rotate(-3deg);
-  pointer-events: none;
+  letter-spacing: -0.02em;
 }
 
-/* ---------- Paper & covers ---------- */
-.ruled {
-  background-color: var(--color-page);
-  background-image: repeating-linear-gradient(
-    to bottom,
-    transparent 0,
-    transparent 31px,
-    rgba(77, 163, 244, 0.13) 31px,
-    rgba(77, 163, 244, 0.13) 32px
-  );
-  background-position: 0 14px;
-}
-.paper-grain {
-  background-color: var(--color-page);
-  background-image:
-    radial-gradient(rgba(122, 85, 57, 0.035) 1px, transparent 1px),
-    radial-gradient(rgba(122, 85, 57, 0.03) 1px, transparent 1px);
-  background-size: 3px 3px, 7px 7px;
-  background-position: 0 0, 1px 2px;
-}
-.cover-texture {
-  background-image:
-    linear-gradient(90deg, rgba(0, 0, 0, 0.18) 0, rgba(0, 0, 0, 0.05) 5%, transparent 9%),
-    radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
-    radial-gradient(rgba(0, 0, 0, 0.06) 1px, transparent 1px);
-  background-size: 100% 100%, 4px 4px, 6px 6px;
-}
-.sticker {
-  border: 3px solid white;
-  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.06), 0 6px 18px rgba(42, 29, 18, 0.18);
+h1, h2, h3 {
+  font-family: var(--font-heading);
+  letter-spacing: 0;
 }
 
-/* ---------- Sky (Deta) ---------- */
-.sky {
-  background: linear-gradient(180deg, #2f8cf0 0%, #5eaaf6 38%, #a9d1fb 70%, #f4f8fc 100%);
+::selection {
+  background: var(--color-orange);
+  color: #121212;
 }
-.cloud {
-  position: absolute;
-  border-radius: 999px;
-  background: radial-gradient(circle at 50% 60%, #fff 0%, #fff 45%, rgba(255, 255, 255, 0.85) 60%, rgba(255, 255, 255, 0) 72%);
-  filter: blur(2px);
-}
-
-/* ---------- Book ---------- */
-.book-shadow {
-  box-shadow:
-    0 1px 0 rgba(0, 0, 0, 0.04),
-    0 30px 60px -20px rgba(42, 29, 18, 0.35),
-    0 18px 30px -18px rgba(42, 29, 18, 0.3);
-}
-.page-left { box-shadow: inset -26px 0 30px -24px rgba(42, 29, 18, 0.28); }
-.page-right { box-shadow: inset 26px 0 30px -24px rgba(42, 29, 18, 0.28); }
-.preserve-3d { transform-style: preserve-3d; }
-.backface-hidden { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
 
 .field {
   width: 100%;
   background: transparent;
   outline: none;
-  resize: none;
+  border: 0;
 }
 .field::placeholder { color: var(--color-ink-faint); }
 
@@ -141,19 +55,4 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
-}
-
-/* Handwriting on ruled lines that scroll with the text */
-.lines {
-  font-family: var(--font-hand);
-  font-size: 23px;
-  line-height: 32px;
-  background-image: repeating-linear-gradient(
-    to bottom,
-    transparent 0,
-    transparent 31px,
-    rgba(77, 163, 244, 0.16) 31px,
-    rgba(77, 163, 244, 0.16) 32px
-  );
-  background-attachment: local;
 }

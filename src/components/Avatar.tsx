@@ -1,9 +1,9 @@
-export function Avatar({ name, src, size = 32 }: { name: string; src: string | null; size?: number }) {
-  return src ? (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img src={src} alt="" width={size} height={size} className="rounded-full object-cover" style={{ width: size, height: size }} />
-  ) : (
-    <span className="grid place-items-center rounded-full bg-sun font-hand text-lg font-semibold" style={{ width: size, height: size, fontSize: size * 0.55 }}>
+export function Avatar({ name, size = 28 }: { name: string; size?: number }) {
+  return (
+    <span
+      className="grid place-items-center rounded-full bg-orange font-medium text-bg"
+      style={{ width: size, height: size, fontSize: size * 0.45 }}
+    >
       {name.slice(0, 1).toUpperCase()}
     </span>
   );
