@@ -3,7 +3,7 @@
 import bcrypt from "bcryptjs";
 import { redirect } from "next/navigation";
 import { sql, assertDb } from "@/lib/db";
-import { createSession, deleteSession } from "@/lib/session";
+import { createSession, deleteSession, requireUserId } from "@/lib/session";
 
 export type AuthState = { error?: string; email?: string; name?: string; birthday?: string } | undefined;
 
@@ -52,4 +52,13 @@ export async function login(_: AuthState, form: FormData): Promise<AuthState> {
 export async function logout() {
   await deleteSession();
   redirect("/");
+}
+
+export async function deleteAccount() {
+  assertDb();
+  const userId = await requireUserId();
+  // All child tables (goals, tasks, year_reviews) cascade on delete — one query is enough.
+  await sql`delete from users where id = ${userId}`;
+  await deleteSession();
+  redirect("/login");
 }

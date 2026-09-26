@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Check } from "lucide-react";
 import { PillButton } from "@/components/PillButton";
 import { updateProfile } from "@/app/actions/journal";
+import { deleteAccount } from "@/app/actions/auth";
 import { ageOn, diffDays, formatFeed, localToday, nextBirthday } from "@/lib/dates";
 import type { User } from "@/lib/types";
 
@@ -19,6 +20,7 @@ export function Profile({ user }: { user: User }) {
   const [birthday, setBirthday] = useState(user.birthday ?? "");
   const [pending, start] = useTransition();
   const [state, setState] = useState<"idle" | "saved" | "error">("idle");
+  const [deleteState, setDeleteState] = useState<"idle" | "confirm">("idle");
 
   const today = localToday();
   const next = birthday ? nextBirthday(birthday, today) : null;
@@ -72,6 +74,51 @@ export function Profile({ user }: { user: User }) {
         >
           {pending ? "Saving…" : "Save"}
         </PillButton>
+      </div>
+
+      {/* Danger zone */}
+      <div className="mt-12 border-t border-line pt-8">
+        <p className="text-sm font-medium text-ink">Danger zone</p>
+        <p className="mt-1 text-sm text-ink-soft">
+          Deleting your account is permanent. All your tasks, goals, and journal entries will be gone forever.
+        </p>
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          {deleteState === "idle" && (
+            <PillButton
+              type="button"
+              tone="ghost"
+              disabled={pending}
+              onClick={() => setDeleteState("confirm")}
+            >
+              Delete account
+            </PillButton>
+          )}
+          {deleteState === "confirm" && (
+            <>
+              <PillButton
+                type="button"
+                tone="ghost"
+                disabled={pending}
+                className="border-red/60 text-red hover:bg-red/5"
+                onClick={() =>
+                  start(async () => {
+                    await deleteAccount();
+                  })
+                }
+              >
+                {pending ? "Deleting…" : "Yes, delete everything"}
+              </PillButton>
+              <PillButton
+                type="button"
+                tone="light"
+                disabled={pending}
+                onClick={() => setDeleteState("idle")}
+              >
+                Cancel
+              </PillButton>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
